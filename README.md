@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>manifest.json生成ツール</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      color: #333;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    label {
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    pre {
+      background-color: #f4f4f4;
+      padding: 15px;
+      border-radius: 5px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .uuid {
+      font-weight: normal;
+      color: #555;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+    .hint {
+      font-size: 12px;
+      color: #888;
+    }
+    .generated-uuid {
+      background-color: #eef;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+    #copyBtn {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+    #copyBtn:hover {
+      background-color: #0056b3;
+      border-color: #004085;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>manifest.json生成ツール</h1>
+    <label for="packName">パック名:</label>
+    <input type="text" id="packName" placeholder="自分だけエフェクト">
+
+    <label for="packDescription">パックの説明:</label>
+    <input type="text" id="packDescription" placeholder="自分だけ悪いエフェクト. 人体パズルまとめ社！">
+
+    <label for="uuid">パック UUID (自動生成):</label>
+    <input type="text" id="uuid" disabled placeholder="自動生成されたUUIDが表示されます">
+
+    <label for="moduleUuid">モジュール UUID (自動生成):</label>
+    <input type="text" id="moduleUuid" disabled placeholder="自動生成されたUUIDが表示されます">
+
+    <button id="generateBtn">manifest.jsonを生成</button>
+
+    <h2>生成されたmanifest.json:</h2>
+    <pre id="output"></pre>
+    <button id="copyBtn" style="display: none;">コピー</button>
+
+    <div class="hint">* UUIDは生成時に自動で作成されます。</div>
+  </div>
+
+  <script>
+    // UUIDを生成する関数
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0,
+            v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    // ページが読み込まれた時にUUIDを自動生成
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('uuid').value = generateUUID();
+      document.getElementById('moduleUuid').value = generateUUID();
+    });
+
+    document.getElementById('generateBtn').addEventListener('click', function() {
+      const packName = document.getElementById('packName').value;
+      const packDescription = document.getElementById('packDescription').value;
+      const uuid = document.getElementById('uuid').value;
+      const moduleUuid = document.getElementById('moduleUuid').value;
+
+      if (!packName || !packDescription) {
+        alert('パック名とパックの説明は必須です');
+        return;
+      }
+
+      const manifest = {
+        "format_version": 2,
+        "header": {
+          "name": packName,
+          "description": packDescription,
+          "uuid": uuid,
+          "version": [1, 0, 0],
+          "min_engine_version": [1, 19, 50]
+        },
+        "modules": [
+          {
+            "type": "data",
+            "uuid": moduleUuid,
+            "version": [1, 0, 0]
+          }
+        ],
+        "dependencies": []
+      };
+
+      // 生成されたJSONを表示
+      const output = document.getElementById('output');
+      output.textContent = JSON.stringify(manifest, null, 2);
+
+      // コピーボタンを表示
+      const copyBtn = document.getElementById('copyBtn');
+      copyBtn.style.display = 'inline-block';
+
+      // コピーボタンのクリックイベント
+      copyBtn.addEventListener('click', function() {
+        // クリップボードにコピー
+        navigator.clipboard.writeText(output.textContent).then(function() {
+          alert('manifest.jsonがクリップボードにコピーされました');
+        }).catch(function(err) {
+          alert('コピーに失敗しました: ' + err);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
